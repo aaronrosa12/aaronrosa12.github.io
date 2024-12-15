@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Química Orgánica</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            margin: 0;
+        }
+
+        .menu {
+            padding: 20px;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        #juego {
+            display: block;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #casilleros {
+            margin-top: 20px;
+        }
+
+        #casilleros div {
+            margin: 10px;
+            padding: 10px;
+            border: 2px solid #333;
+            display: inline-block;
+            width: 150px;
+            height: 50px;
+        }
+
+        #casilleros div.dragging {
+            background-color: #a8d0e6;
+        }
+
+        .respuesta {
+            background-color: #d8e7f3;
+            margin: 10px;
+            padding: 10px;
+            border: 2px solid #333;
+            cursor: pointer;
+        }
+
+        .respuesta:hover {
+            background-color: #b0c4de;
+        }
+
+        #resultado {
+            margin-top: 20px;
+        }
+
+        .casillero {
+            margin: 10px;
+            padding: 10px;
+            border: 2px solid #333;
+            display: inline-block;
+            width: 150px;
+            height: 50px;
+            text-align: center;
+            vertical-align: top;
+        }
+
+        img {
+            width: 100%;
+            max-width: 300px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="menuInicio" class="menu">
+        <h1>Juegos de Química Orgánica</h1>
+        <p>Creadores: Aaron Thaylor Rosa, Anthony Andree Muñiz</p>
+        <img src="C:\Users\Thaylor\Desktop\Nueva carpeta/img" alt="Imagen de inicio" />
+        <button onclick="mostrarMenuSeleccion()">Comenzar Juego</button>
+    </div>
+
+    <div id="menuSeleccion" class="menu" style="display: none;">
+        <h1>Seleccionar Jugador</h1>
+        <img src="https://images.app.goo.gl/eGGcCeueaaLpmTB49" alt="Imagen de selección de jugador" />
+        <button onclick="iniciarJuego(1)">Jugador 1</button>
+        <button onclick="iniciarJuego(2)">Jugador 2</button>
+    </div>
+
+    <div id="juego" class="juego" style="display: none;">
+        <h2>Juego de Química Orgánica</h2>
+        <img src="https://images.app.goo.gl/PvsiwQmGopUjuiZp9" alt="Imagen del juego" />
+        <div id="pregunta"></div>
+        <div id="casilleros"></div>
+        <div id="respuestas"></div>
+        <button onclick="comprobarRespuestas()">Comprobar Respuestas</button>
+        <div id="resultado"></div>
+    </div>
+
+    <div id="final" class="menu" style="display: none;">
+        <img src="https://images.app.goo.gl/JWLSBVchxn5UCvtZ6" alt="Imagen final" />
+        <h2>Fin del Juego</h2>
+        <p id="resultadoFinal"></p>
+        <button onclick="resetJuego()">Volver a Jugar</button>
+    </div>
+
+    <script>
+        let jugadorSeleccionado = null;
+        let preguntas = [
+            {
+                pregunta: "¿Cuál es el grupo funcional de los alcoholes?",
+                respuestas: ["-OH", "-COOH", "-NH2", "-C=O"],
+                correcta: "-OH",
+            },
+            {
+                pregunta: "¿Qué grupo funcional pertenece a los ácidos carboxílicos?",
+                respuestas: ["-OH", "-COOH", "-NH2", "-C=O"],
+                correcta: "-COOH",
+            },
+            {
+                pregunta: "¿Cuál es el grupo funcional de las aminas?",
+                respuestas: ["-NH2", "-COOH", "-C=O", "-OH"],
+                correcta: "-NH2",
+            },
+        ];
+
+        let puntajeCorrecto = 0;
+        let puntajeIncorrecto = 0;
+        let preguntaActual = 0;
+
+        function mostrarMenuSeleccion() {
+            document.getElementById('menuInicio').style.display = 'none';
+            document.getElementById('menuSeleccion').style.display = 'block';
+        }
+
+        function iniciarJuego(jugador) {
+            jugadorSeleccionado = jugador;
+            document.getElementById('menuSeleccion').style.display = 'none';
+            document.getElementById('juego').style.display = 'block';
+            cargarPregunta();
+        }
+
+        function cargarPregunta() {
+            let pregunta = preguntas[preguntaActual];
+            document.getElementById('pregunta').innerText = pregunta.pregunta;
+
+            let casilleros = document.getElementById('casilleros');
+            casilleros.innerHTML = '';
+            for (let i = 0; i < 1; i++) {
+                let casillero = document.createElement('div');
+                casillero.setAttribute('ondrop', 'drop(event)');
+                casillero.setAttribute('ondragover', 'permitirDrop(event)');
+                casillero.classList.add('casillero');
+                casilleros.appendChild(casillero);
+            }
+
+            let respuestas = document.getElementById('respuestas');
+            respuestas.innerHTML = '';
+            pregunta.respuestas.forEach(respuesta => {
+                let div = document.createElement('div');
+                div.innerText = respuesta;
+                div.setAttribute('draggable', true);
+                div.setAttribute('ondragstart', 'drag(event)');
+                div.classList.add('respuesta');
+                respuestas.appendChild(div);
+            });
+        }
+
+        function drag(event) {
+            event.dataTransfer.setData('text', event.target.innerText);
+        }
+
+        function permitirDrop(event) {
+            event.preventDefault();
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            let respuesta = event.dataTransfer.getData('text');
+            event.target.innerText = respuesta;
+        }
+
+        function comprobarRespuestas() {
+            let casilleros = document.querySelectorAll('#casilleros .casillero');
+            let respuestasCorrectas = 0;
+
+            casilleros.forEach(casillero => {
+                if (casillero.innerText === preguntas[preguntaActual].correcta) {
+                    respuestasCorrectas++;
+                } else {
+                    puntajeIncorrecto++;
+                }
+            });
+
+            if (respuestasCorrectas > 0) {
+                puntajeCorrecto++;
+            } else {
+                puntajeIncorrecto++;
+            }
+
+            preguntaActual++;
+
+            if (preguntaActual < preguntas.length) {
+                cargarPregunta();
+            } else {
+                mostrarResultado();
+            }
+        }
+
+        function mostrarResultado() {
+            document.getElementById('juego').style.display = 'none';
+            document.getElementById('final').style.display = 'block';
+            document.getElementById('resultadoFinal').innerHTML = `
+                <p>Puntaje Correcto: ${puntajeCorrecto}</p>
+                <p>Puntaje Incorrecto: ${puntajeIncorrecto}</p>
+                <p>Puntaje Total: ${puntajeCorrecto * 10 - puntajeIncorrecto}</p>
+            `;
+        }
+
+        function resetJuego() {
+            puntajeCorrecto = 0;
+            puntajeIncorrecto = 0;
+            preguntaActual = 0;
+            document.getElementById('final').style.display = 'none';
+            document.getElementById('menuInicio').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
